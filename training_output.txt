@@ -1,0 +1,46 @@
+Pierwsze 5 rekordów:
+        album  ...                                             lyrics
+0  0,25 mg EP  ...  [Zwrotka 1: Quebonafide]  Chcesz potańczyć, ch...
+1  0,25 mg EP  ...  [Zwrotka 1: Quebonafide]  Możesz sobą być, no ...
+2  0,25 mg EP  ...  [Refren: Taco Hemingway]  Nie miałem grosza pr...
+3  0,25 mg EP  ...  [Intro: C-3PO]  Did you hear that? This is mad...
+4  0,25 mg EP  ...  [Zwrotka 1: Taco Hemingway]  To niespotykane, ...
+
+[5 rows x 3 columns]
+
+Rozmiar danych: (165, 3)
+
+Typy kolumn:
+album     object
+title     object
+lyrics    object
+dtype: object
+
+Liczba rekordów po wyborze wariantu B: 57
+
+Liczba utworów na album:
+album
+1-800-OŚWIECENIE                  26
+Marmur                            16
+LATARNIE WSZĘDZIE DAWNO ZGASŁY    15
+Name: count, dtype: int64
+
+Wyniki cross-validation (accuracy): [0.66666667 0.91666667 0.90909091 0.72727273 0.72727273]
+Średnia accuracy CV: 0.7894
+Odchylenie standardowe CV: 0.1033
+
+Accuracy na zbiorze testowym: 0.9167
+
+Raport klasyfikacji:
+                                precision    recall  f1-score   support
+
+              1-800-OŚWIECENIE       1.00      0.83      0.91         6
+LATARNIE WSZĘDZIE DAWNO ZGASŁY       0.75      1.00      0.86         3
+                        Marmur       1.00      1.00      1.00         3
+
+                      accuracy                           0.92        12
+                     macro avg       0.92      0.94      0.92        12
+                  weighted avg       0.94      0.92      0.92        12
+
+
+Model zapisano do: artifacts/model_v1.joblib

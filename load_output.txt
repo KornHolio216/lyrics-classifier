@@ -1,0 +1,12 @@
+Model został poprawnie wczytany z pliku.
+
+Przykładowy tekst:
+Warszawa nocą, szybkie tempo życia, kluby, taxi, miasto i znajomi.
+    Dużo obserwacji o codzienności, relacjach i presji dużego miasta.
+
+Przewidziany album: LATARNIE WSZĘDZIE DAWNO ZGASŁY
+
+Prawdopodobieństwa klas:
+- LATARNIE WSZĘDZIE DAWNO ZGASŁY: 0.3981
+- 1-800-OŚWIECENIE: 0.3289
+- Marmur: 0.2730
