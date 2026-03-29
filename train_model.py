@@ -16,16 +16,12 @@ SELECTED_ALBUMS = [
 ]
 RANDOM_STATE = 42
 
-
 def load_data() -> pd.DataFrame:
     df = pd.read_csv(DATA_PATH, sep=";;", engine="python")
-    print("Pierwsze 5 rekordów:")
-    print(df.head())
-    print("\nRozmiar danych:", df.shape)
+    print("Rozmiar pełnego zbioru danych:", df.shape)
     print("\nTypy kolumn:")
     print(df.dtypes)
     return df
-
 
 def build_pipeline() -> Pipeline:
     return Pipeline(
@@ -50,13 +46,22 @@ def build_pipeline() -> Pipeline:
         ]
     )
 
-
 def main() -> None:
     df = load_data()
+
     filtered = df[df["album"].isin(SELECTED_ALBUMS)].copy()
-    print("\nLiczba rekordów po wyborze wariantu B:", filtered.shape[0])
+
+    print("\nWybrane albumy:")
+    for album in SELECTED_ALBUMS:
+        print(f"- {album}")
+
+    print(f"\nLiczba rekordów po filtrowaniu do 3 albumów: {filtered.shape[0]}")
+
     print("\nLiczba utworów na album:")
     print(filtered["album"].value_counts())
+
+    print("\nPierwsze 5 rekordów po filtrowaniu:")
+    print(filtered[["album", "title"]].head())
 
     X = filtered["lyrics"].astype(str)
     y = filtered["album"].astype(str)
@@ -73,6 +78,7 @@ def main() -> None:
 
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     cv_scores = cross_val_score(pipeline, X, y, cv=cv, scoring="accuracy", n_jobs=1)
+
     print("\nWyniki cross-validation (accuracy):", cv_scores)
     print("Średnia accuracy CV: {:.4f}".format(cv_scores.mean()))
     print("Odchylenie standardowe CV: {:.4f}".format(cv_scores.std()))
@@ -88,7 +94,6 @@ def main() -> None:
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipeline, MODEL_PATH)
     print(f"\nModel zapisano do: {MODEL_PATH}")
-
 
 if __name__ == "__main__":
     main()

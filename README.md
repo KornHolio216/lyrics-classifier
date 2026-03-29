@@ -3,9 +3,9 @@
 Projekt realizuje laboratorium z tworzenia, zapisywania i wersjonowania modelu ML w Pythonie.
 
 ## Problem
-Na podstawie tekstu utworu model przewiduje, z którego albumu pochodzi piosenka.
+Na podstawie tekstu model przewiduje, z którego albumu pochodzi piosenka.
 
-Wybrane albumy (wariant B):
+Wybrane albumy:
 - 1-800-OŚWIECENIE
 - Marmur
 - LATARNIE WSZĘDZIE DAWNO ZGASŁY
@@ -24,11 +24,11 @@ python load_model.py
 - `load_model.py` - wczytanie modelu i predykcja testowa
 - `data/lyrics_data.csv` - dane wejściowe
 - `artifacts/model_v1.joblib` - zapisany model
-- `sprawozdanie.md` - gotowe sprawozdanie w Markdown
+- `sprawozdanie.md` - sprawozdanie
 
 ## Wersjonowanie modelu
 - `model_v1.joblib` - pierwsza wersja modelu
-- kolejne wersje należy tworzyć po zmianie danych, modelu, hiperparametrów lub preprocessing'u
+- kolejne wersje należy tworzyć po zmianie danych, modelu, parametrów lub preprocessing'u
 
 Przykład tagu Git:
 ```bash

@@ -3,13 +3,13 @@ import joblib
 
 MODEL_PATH = Path("artifacts/model_v1.joblib")
 
-
 def main() -> None:
     model = joblib.load(MODEL_PATH)
 
     sample_text = """
-    Warszawa nocą, szybkie tempo życia, kluby, taxi, miasto i znajomi.
-    Dużo obserwacji o codzienności, relacjach i presji dużego miasta.
+    Głucha noc, na ulicach ciągle cicho.
+    Noc się toczy, tak jak każda inna.
+    Znowu pokłóciłem się z taryfą.
     """
 
     prediction = model.predict([sample_text])[0]
@@ -27,7 +27,6 @@ def main() -> None:
         print("\nPrawdopodobieństwa klas:")
         for label, prob in sorted(zip(classes, probabilities), key=lambda x: x[1], reverse=True):
             print(f"- {label}: {prob:.4f}")
-
 
 if __name__ == "__main__":
     main()
