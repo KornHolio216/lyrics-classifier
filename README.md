@@ -14,7 +14,7 @@ Pierwsza wersja projektu działała na ręcznie wybranych 3 albumach:
 - `Marmur`
 - `LATARNIE WSZĘDZIE DAWNO ZGASŁY`
 
-Aktualna wersja rozszerza trening na prawie całą dyskografię dostępną w zbiorze danych. Model automatycznie wybiera albumy, które mają co najmniej 4 utwory w dataspecie.
+Aktualna wersja rozszerza trening na całą dyskografię dostępną w zbiorze danych. Model automatycznie wybiera albumy, które mają co najmniej 4 utwory w dataspecie.
 
 ## Dane
 

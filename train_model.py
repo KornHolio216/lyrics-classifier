@@ -194,6 +194,30 @@ def save_errors_csv(X_test, y_test, predictions, pipeline) -> None:
     print(f"Zapisano błędne predykcje do: {output_path}")
     print(f"Liczba błędów w zbiorze testowym: {len(errors)}")
 
+def save_error_summary_csv(y_test, predictions) -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    errors = pd.DataFrame(
+        {
+            "true_album": y_test,
+            "predicted_album": predictions,
+        }
+    )
+
+    errors = errors[errors["true_album"] != errors["predicted_album"]].copy()
+
+    error_summary = (
+        errors.groupby(["true_album", "predicted_album"])
+        .size()
+        .reset_index(name="count")
+        .sort_values(by="count", ascending=False)
+    )
+
+    output_path = REPORTS_DIR / "error_summary.csv"
+    error_summary.to_csv(output_path, index=False, encoding="utf-8")
+
+    print(f"Zapisano podsumowanie błędów do: {output_path}")
+
 def save_model_comparison(X, y, X_train, X_test, y_train, y_test, cv) -> None:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -330,6 +354,11 @@ def main() -> None:
         y_test=y_test,
         predictions=predictions,
         pipeline=pipeline,
+    )
+
+    save_error_summary_csv(
+        y_test=y_test,
+        predictions=predictions,
     )
 
     save_model_comparison(
