@@ -2,11 +2,13 @@ from pathlib import Path
 import json
 import joblib
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 #config
 DATA_PATH = Path("data/lyrics_data.csv")
@@ -127,6 +129,60 @@ def save_reports(
     print(f"\nZapisano metryki do: {REPORTS_DIR / 'metrics.json'}")
     print(f"Zapisano raport klasyfikacji do: {REPORTS_DIR / 'classification_report.txt'}")
 
+def save_confusion_matrix(y_test, predictions, labels) -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    matrix = confusion_matrix(y_test, predictions, labels=labels)
+
+    fig, ax = plt.subplots(figsize=(14, 14))
+    display = ConfusionMatrixDisplay(
+        confusion_matrix=matrix,
+        display_labels=labels,
+    )
+    display.plot(ax=ax, xticks_rotation=90, values_format="d", colorbar=False)
+
+    plt.title("Confusion matrix - Lyrics Classifier")
+    plt.tight_layout()
+
+    output_path = REPORTS_DIR / "confusion_matrix.png"
+    plt.savefig(output_path, dpi=200)
+    plt.close(fig)
+
+    print(f"Zapisano confusion matrix do: {output_path}")
+
+def save_errors_csv(X_test, y_test, predictions, pipeline) -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    errors = pd.DataFrame({
+        "lyrics": X_test,
+        "true_album": y_test,
+        "predicted_album": predictions,
+    })
+
+    if hasattr(pipeline.named_steps["classifier"], "predict_proba"):
+        probabilities = pipeline.predict_proba(X_test)
+        confidence = probabilities.max(axis=1)
+        errors["confidence"] = confidence
+    else:
+        errors["confidence"] = None
+
+    errors = errors[errors["true_album"] != errors["predicted_album"]].copy()
+
+    errors["lyrics_preview"] = (
+        errors["lyrics"]
+        .astype(str)
+        .str.replace("\n", " ", regex=False)
+        .str.slice(0, 250)
+    )
+
+    errors = errors.drop(columns=["lyrics"])
+
+    output_path = REPORTS_DIR / "errors.csv"
+    errors.to_csv(output_path, index=False, encoding="utf-8")
+
+    print(f"Zapisano błędne predykcje do: {output_path}")
+    print(f"Liczba błędów w zbiorze testowym: {len(errors)}")
+
 def main() -> None:
     df = load_data()
     filtered = filter_albums(df)
@@ -159,6 +215,7 @@ def main() -> None:
 
     pipeline.fit(X_train, y_train)
     predictions = pipeline.predict(X_test)
+    labels = sorted(y.unique())
 
     accuracy = accuracy_score(y_test, predictions)
     macro_f1 = f1_score(y_test, predictions, average="macro", zero_division=0)
@@ -181,6 +238,19 @@ def main() -> None:
         n_albums=filtered["album"].nunique(),
         n_songs=filtered.shape[0],
         n_splits=n_splits,
+    )
+
+    save_confusion_matrix(
+        y_test=y_test,
+        predictions=predictions,
+        labels=labels,
+    )
+
+    save_errors_csv(
+        X_test=X_test,
+        y_test=y_test,
+        predictions=predictions,
+        pipeline=pipeline,
     )
 
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
