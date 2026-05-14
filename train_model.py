@@ -218,6 +218,8 @@ def save_error_summary_csv(y_test, predictions) -> None:
 
     print(f"Zapisano podsumowanie błędów do: {output_path}")
 
+    return output_path
+
 def save_model_comparison(X, y, X_train, X_test, y_train, y_test, cv) -> None:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -285,6 +287,79 @@ def save_model_comparison(X, y, X_train, X_test, y_train, y_test, cv) -> None:
     print(f"Zapisano porównanie modeli do: {output_path}")
     print("\nPorównanie modeli:")
     print(comparison)
+
+    return output_path
+
+def save_evaluation_summary(
+    df,
+    metrics,
+    errors_count,
+    model_comparison_path,
+    error_summary_path,
+) -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    model_comparison = pd.read_csv(model_comparison_path)
+    error_summary = pd.read_csv(error_summary_path)
+
+    best_model = model_comparison.iloc[0]
+
+    most_common_wrong_predictions = (
+        error_summary["predicted_album"]
+        .value_counts()
+        .head(5)
+    )
+
+    lines = [
+        "Lyrics Classifier - podsumowanie ewaluacji",
+        "",
+        f"Liczba albumów po filtrowaniu: {df['album'].nunique()}",
+        f"Liczba utworów po filtrowaniu: {len(df)}",
+        f"Minimalna liczba utworów na album: {MIN_SONGS_PER_ALBUM}",
+        "",
+        "Główny model: Logistic Regression",
+        f"CV accuracy mean: {metrics['cv_accuracy_mean']:.4f}",
+        f"CV accuracy std: {metrics['cv_accuracy_std']:.4f}",
+        f"Test accuracy: {metrics['test_accuracy']:.4f}",
+        f"Test macro F1: {metrics['test_macro_f1']:.4f}",
+        f"Test weighted F1: {metrics['test_weighted_f1']:.4f}",
+        "",
+        "Najlepszy model w porównaniu:",
+        f"{best_model['model']} "
+        f"(test macro F1: {best_model['test_macro_f1']:.4f}, "
+        f"test accuracy: {best_model['test_accuracy']:.4f})",
+        "",
+        f"Liczba błędnych predykcji w zbiorze testowym: {errors_count}",
+        "",
+        "Najczęściej przewidywane albumy wśród błędów:",
+    ]
+
+    for album, count in most_common_wrong_predictions.items():
+        lines.append(f"- {album}: {count}")
+
+    lines.extend(
+        [
+            "",
+            "Interpretacja:",
+            (
+                "Spadek wyników względem wcześniejszej wersji 3-albumowej jest oczekiwany, "
+                "ponieważ aktualne zadanie obejmuje 15 klas i mały, nierówny dataset."
+            ),
+            (
+                "Logistic Regression pozostaje najlepszym modelem referencyjnym, "
+                "bo osiąga najwyższe test macro F1 w porównaniu modeli."
+            ),
+            (
+                "Błędy są rozproszone po wielu parach albumów, ale Marmur pojawia się "
+                "najczęściej jako błędna predykcja."
+            ),
+        ]
+    )
+
+    output_path = REPORTS_DIR / "evaluation_summary.txt"
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+    print(f"Zapisano podsumowanie ewaluacji do: {output_path}")
 
 def main() -> None:
     df = load_data()
@@ -356,12 +431,12 @@ def main() -> None:
         pipeline=pipeline,
     )
 
-    save_error_summary_csv(
+    error_summary_path = save_error_summary_csv(
         y_test=y_test,
         predictions=predictions,
     )
 
-    save_model_comparison(
+    model_comparison_path = save_model_comparison(
         X=X,
         y=y,
         X_train=X_train,
@@ -369,6 +444,22 @@ def main() -> None:
         y_train=y_train,
         y_test=y_test,
         cv=cv,
+    )
+
+    metrics = {
+        "cv_accuracy_mean": float(cv_scores.mean()),
+        "cv_accuracy_std": float(cv_scores.std()),
+        "test_accuracy": float(accuracy),
+        "test_macro_f1": float(macro_f1),
+        "test_weighted_f1": float(weighted_f1),
+    }
+
+    save_evaluation_summary(
+        df=filtered,
+        metrics=metrics,
+        errors_count=int((y_test != predictions).sum()),
+        model_comparison_path=model_comparison_path,
+        error_summary_path=error_summary_path,
     )
 
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
