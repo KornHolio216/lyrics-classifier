@@ -1,0 +1,19 @@
+{
+  "n_albums": 15,
+  "n_songs": 164,
+  "min_songs_per_album": 4,
+  "test_size": 0.2,
+  "random_state": 42,
+  "cv_n_splits": 4,
+  "cv_accuracy_mean": 0.6097560975609757,
+  "cv_accuracy_std": 0.06218316479991202,
+  "cv_accuracy_scores": [
+    0.5121951219512195,
+    0.6341463414634146,
+    0.6097560975609756,
+    0.6829268292682927
+  ],
+  "test_accuracy": 0.5454545454545454,
+  "test_macro_f1": 0.45826839826839827,
+  "test_weighted_f1": 0.4885478158205431
+}
