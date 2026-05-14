@@ -3,12 +3,20 @@ import json
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.dummy import DummyClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report, f1_score
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+)
 from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.svm import LinearSVC
 
 #config
 DATA_PATH = Path("data/lyrics_data.csv")
@@ -64,7 +72,15 @@ def filter_albums(df: pd.DataFrame) -> pd.DataFrame:
 
     return filtered
 
-def build_pipeline() -> Pipeline:
+def build_pipeline(classifier=None) -> Pipeline:
+    if classifier is None:
+        classifier = LogisticRegression(
+            max_iter=2000,
+            class_weight="balanced",
+            solver="lbfgs",
+            random_state=RANDOM_STATE,
+        )
+
     return Pipeline(
         steps=[
             (
@@ -80,12 +96,7 @@ def build_pipeline() -> Pipeline:
             ),
             (
                 "classifier",
-                LogisticRegression(
-                    max_iter=2000,
-                    class_weight="balanced",
-                    solver="lbfgs",
-                    random_state=RANDOM_STATE,
-                ),
+                classifier,
             ),
         ]
     )
@@ -183,6 +194,74 @@ def save_errors_csv(X_test, y_test, predictions, pipeline) -> None:
     print(f"Zapisano błędne predykcje do: {output_path}")
     print(f"Liczba błędów w zbiorze testowym: {len(errors)}")
 
+def save_model_comparison(X, y, X_train, X_test, y_train, y_test, cv) -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    models = {
+        "dummy_most_frequent": DummyClassifier(strategy="most_frequent"),
+        "logistic_regression": LogisticRegression(
+            max_iter=2000,
+            class_weight="balanced",
+            solver="lbfgs",
+            random_state=RANDOM_STATE,
+        ),
+        "multinomial_nb": MultinomialNB(),
+        "linear_svc": LinearSVC(
+            class_weight="balanced",
+            random_state=RANDOM_STATE,
+        ),
+    }
+
+    rows = []
+
+    for model_name, classifier in models.items():
+        pipeline = build_pipeline(classifier)
+
+        cv_scores = cross_val_score(
+            pipeline,
+            X,
+            y,
+            cv=cv,
+            scoring="accuracy",
+            n_jobs=1,
+        )
+
+        pipeline.fit(X_train, y_train)
+        predictions = pipeline.predict(X_test)
+
+        rows.append(
+            {
+                "model": model_name,
+                "cv_accuracy_mean": cv_scores.mean(),
+                "cv_accuracy_std": cv_scores.std(),
+                "test_accuracy": accuracy_score(y_test, predictions),
+                "test_macro_f1": f1_score(
+                    y_test,
+                    predictions,
+                    average="macro",
+                    zero_division=0,
+                ),
+                "test_weighted_f1": f1_score(
+                    y_test,
+                    predictions,
+                    average="weighted",
+                    zero_division=0,
+                ),
+            }
+        )
+
+    comparison = pd.DataFrame(rows).sort_values(
+        by="test_macro_f1",
+        ascending=False,
+    )
+
+    output_path = REPORTS_DIR / "model_comparison.csv"
+    comparison.to_csv(output_path, index=False, encoding="utf-8")
+
+    print(f"Zapisano porównanie modeli do: {output_path}")
+    print("\nPorównanie modeli:")
+    print(comparison)
+
 def main() -> None:
     df = load_data()
     filtered = filter_albums(df)
@@ -251,6 +330,16 @@ def main() -> None:
         y_test=y_test,
         predictions=predictions,
         pipeline=pipeline,
+    )
+
+    save_model_comparison(
+        X=X,
+        y=y,
+        X_train=X_train,
+        X_test=X_test,
+        y_train=y_train,
+        y_test=y_test,
+        cv=cv,
     )
 
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
