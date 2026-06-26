@@ -1,13 +1,12 @@
 true_album,predicted_album,count
 "0,25 mg EP","POCZTÓWKA Z WWA, LATO '19",1
 "0,25 mg EP","SOMA 0,5 mg",1
+Café Belga,Europa,1
 Café Belga,LATARNIE WSZĘDZIE DAWNO ZGASŁY,1
-Café Belga,Marmur,1
 Europa,Café Belga,1
 Europa,Jarmark,1
 Flagey EP,Marmur,1
-Jarmark,Europa,1
-"POCZTÓWKA Z WWA, LATO '19",Marmur,1
+Jarmark,LATARNIE WSZĘDZIE DAWNO ZGASŁY,1
 "SOMA 0,5 mg","0,25 mg EP",1
 "SOMA 0,5 mg",Café Belga,1
 "SOMA 0,5 mg","POCZTÓWKA Z WWA, LATO '19",1
