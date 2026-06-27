@@ -16,7 +16,7 @@
 W tym projekcie rozwiązuję zadanie klasyfikacji tekstu: na podstawie lyrics
 model przewiduje, z którego albumu pochodzi utwór. Zbudowałem mały, ale pełny
 pipeline ML/NLP: od czyszczenia danych, przez trening i porównanie modeli, po
-analizę błędów oraz raporty gotowe do omówienia w portfolio.
+analizę błędów oraz raporty ułatwiające ocenę działania modelu.
 
 Najważniejsze założenie: nie gonię wyłącznie za accuracy. Dataset jest mały i
 nierówny, więc pokazuję świadomą ewaluację, baseline, macro F1, confusion
@@ -222,6 +222,20 @@ Aktualne wyniki:
 Najlepszy pojedynczy wynik testowy daje wariant unigramowy. Traktuję go jako
 dobrego kandydata na kolejną konfigurację domyślną, ale przy tak małym zbiorze
 warto traktować pojedynczy split ostrożnie.
+
+## Kaggle
+
+Notebook z pełnym przebiegiem analizy jest dostępny na Kaggle:
+
+```text
+https://www.kaggle.com/code/mateuszmachowski/taco-hemingway-album-classifier
+```
+
+Dataset:
+
+```text
+https://www.kaggle.com/datasets/b14ucky/taco-hemingway-lyrics
+```
 
 ## Szybki start
 
