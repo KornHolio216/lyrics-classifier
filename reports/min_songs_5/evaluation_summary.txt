@@ -1,27 +1,23 @@
 Lyrics Classifier - podsumowanie ewaluacji
 
-Liczba albumów po filtrowaniu: 15
-Liczba utworów po filtrowaniu: 164
-Minimalna liczba utworów na album: 4
-TF-IDF min_df: 2
-TF-IDF max_features: 5000
-TF-IDF ngram_range: (1, 2)
-TF-IDF sublinear_tf: True
+Liczba albumów po filtrowaniu: 14
+Liczba utworów po filtrowaniu: 160
+Minimalna liczba utworów na album: 5
 
 Główny model: Logistic Regression
-CV accuracy mean: 0.6098
-CV accuracy std: 0.0622
-Test accuracy: 0.5455
-Test macro F1: 0.4583
-Test weighted F1: 0.4885
+CV accuracy mean: 0.6375
+CV accuracy std: 0.0940
+Test accuracy: 0.6250
+Test macro F1: 0.5391
+Test weighted F1: 0.5618
 
 Najlepszy model w porównaniu:
-logistic_regression (test macro F1: 0.4583, test accuracy: 0.5455)
+logistic_regression (test macro F1: 0.5391, test accuracy: 0.6250)
 
-Liczba błędnych predykcji w zbiorze testowym: 15
+Liczba błędnych predykcji w zbiorze testowym: 12
 
 Najczęściej przewidywane albumy wśród błędów:
-- Marmur: 5
+- Marmur: 3
 - Café Belga: 3
 - POCZTÓWKA Z WWA, LATO '19: 2
 - SOMA 0,5 mg: 1

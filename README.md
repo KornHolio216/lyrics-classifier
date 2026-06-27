@@ -1,28 +1,91 @@
-# Lyrics Classifier - klasyfikacja albumów Taco Hemingwaya
+<h1 align="center">Lyrics Classifier</h1>
 
-Projekt ML/NLP służący do klasyfikacji albumu Taco Hemingwaya na 
-podstawie tekstu piosenki.
+<p align="center">
+  Klasyfikator albumów Taco Hemingwaya na podstawie tekstu utworu.
+</p>
 
-## Problem
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="scikit-learn" src="https://img.shields.io/badge/scikit--learn-ML-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white">
+  <img alt="NLP" src="https://img.shields.io/badge/NLP-TF--IDF-2E8B57?style=for-the-badge">
+  <img alt="Model" src="https://img.shields.io/badge/model-Logistic%20Regression-6A5ACD?style=for-the-badge">
+</p>
 
-Na podstawie tekstu piosenki model przewiduje, z którego albumu 
-Taco Hemingwaya pochodzi utwór.
+## O projekcie
 
-Pierwsza wersja projektu działała na ręcznie wybranych 3 albumach:
+W tym projekcie rozwiązuję zadanie klasyfikacji tekstu: na podstawie lyrics
+model przewiduje, z którego albumu pochodzi utwór. Zbudowałem mały, ale pełny
+pipeline ML/NLP: od czyszczenia danych, przez trening i porównanie modeli, po
+analizę błędów oraz raporty gotowe do omówienia w portfolio.
 
-- `1-800-OŚWIECENIE`
-- `Marmur`
-- `LATARNIE WSZĘDZIE DAWNO ZGASŁY`
+Najważniejsze założenie: nie gonię wyłącznie za accuracy. Dataset jest mały i
+nierówny, więc pokazuję świadomą ewaluację, baseline, macro F1, confusion
+matrix i wpływ progu filtrowania albumów.
 
-Aktualna wersja rozszerza trening na pełniejszą dyskografię
-dostępną w zbiorze danych. Zamiast ręcznie wskazywać albumy, 
-skrypt automatycznie wybiera albumy, które mają co najmniej 4 utwory w zbiorze danych.
+## Wyniki w skrócie
+
+Domyślna konfiguracja używa 15 albumów i 164 utworów po filtrowaniu
+`MIN_SONGS_PER_ALBUM = 4`.
+
+| Metryka | Wynik |
+|---|---:|
+| CV accuracy mean | 0.6098 |
+| CV accuracy std | 0.0622 |
+| Test accuracy | 0.5455 |
+| Test macro F1 | 0.4583 |
+| Test weighted F1 | 0.4885 |
+| Liczba klas | 15 |
+| Liczba błędów na teście | 15 |
+
+Najnowszy eksperyment TF-IDF pokazał mi, że wariant `unigrams_only` daje lepszy
+wynik testowy (`macro F1 = 0.4989`) niż konfiguracja domyślna z bigramami
+(`macro F1 = 0.4583`). Domyślnej konfiguracji jeszcze nie zmieniłem, bo warto
+najpierw potwierdzić ten wynik na kolejnych eksperymentach.
+
+## Podgląd ewaluacji
+
+Macierz pomyłek dla domyślnej konfiguracji:
+
+<p align="center">
+  <img src="reports/confusion_matrix.png" alt="Confusion matrix dla klasyfikatora lyrics" width="760">
+</p>
+
+Najczęściej przewidywane albumy wśród błędnych predykcji:
+
+| Album przewidziany błędnie | Liczba |
+|---|---:|
+| `Marmur` | 5 |
+| `Café Belga` | 3 |
+| `POCZTÓWKA Z WWA, LATO '19` | 2 |
+| `SOMA 0,5 mg` | 1 |
+| `LATARNIE WSZĘDZIE DAWNO ZGASŁY` | 1 |
+
+## Co pokazuję w projekcie
+
+- klasyczny pipeline NLP: `TfidfVectorizer -> LogisticRegression`;
+- baseline przez `DummyClassifier`;
+- porównanie kilku modeli tekstowych;
+- stratyfikowany train/test split;
+- cross-validation przez `StratifiedKFold`;
+- raporty `metrics.json`, `classification_report.txt`, `errors.csv`;
+- agregację błędów w `error_summary.csv`;
+- interpretowalność przez `top_features_by_album.csv`;
+- eksperyment z progiem `min_songs`;
+- eksperymenty z parametrami TF-IDF;
+- CLI do powtarzalnych eksperymentów.
+
 ## Dane
 
-Projekt korzysta z pliku:
+Korzystam z pliku:
 
 ```text
 data/lyrics_data.csv
+```
+
+Format danych:
+
+```text
+album;;title;;lyrics
 ```
 
 Dataset zawiera 165 rekordów i 3 kolumny:
@@ -33,14 +96,15 @@ title
 lyrics
 ```
 
-Po usunięciu rekordów niespełniających warunków oraz zastosowaniu progu `MIN_SONGS_PER_ALBUM = 4`, do treningu wykorzystywane są:
+Po usunięciu pustych wartości oraz zastosowaniu domyślnego progu
+`MIN_SONGS_PER_ALBUM = 4` do treningu trafia:
 
 ```text
 15 albumów
 164 utwory
 ```
 
-Albumy użyte w aktualnej wersji:
+Albumy użyte w domyślnej konfiguracji:
 
 - `0,25 mg EP`
 - `1-800-OŚWIECENIE`
@@ -58,88 +122,35 @@ Albumy użyte w aktualnej wersji:
 - `WOSK EP`
 - `Young Hems`
 
-## Aktualny pipeline
+## Pipeline
 
-Model jest zbudowany jako pipeline `scikit-learn`:
+Domyślnie trenuję model:
 
 ```text
 TfidfVectorizer -> LogisticRegression
 ```
 
-Wykorzystywane elementy:
+Najważniejsze elementy pipeline:
 
-- czyszczenie podstawowych braków w danych,
-- usuwanie rekordów bez albumu lub bez tekstu,
-- automatyczne filtrowanie albumów według minimalnej liczby utworów,
-- reprezentacja tekstu przez TF-IDF,
-- unigramy i bigramy,
-- regresja logistyczna z `class_weight="balanced"`,
-- podział train/test ze stratyfikacją,
-- walidacja krzyżowa `StratifiedKFold`,
-- zapis modelu do pliku `.joblib`,
-- zapis metryk i raportów do katalogu `reports/`.
-
-Aktualny model główny:
-
-```text
-LogisticRegression(max_iter=2000, class_weight="balanced", solver="lbfgs")
-```
-
-## Wyniki aktualnej wersji
-
-Konfiguracja:
-
-```text
-MIN_SONGS_PER_ALBUM = 4
-TEST_SIZE = 0.2
-RANDOM_STATE = 42
-CV folds = 4
-```
-
-Wyniki głównego modelu `Logistic Regression`:
-
-```text
-CV accuracy mean: 0.6098
-CV accuracy std: 0.0622
-Test accuracy: 0.5455
-Test macro F1: 0.4583
-Test weighted F1: 0.4885
-```
-
-Spadek wyników względem wcześniejszej wersji 3-albumowej jest oczekiwany. Aktualne zadanie jest trudniejsze, ponieważ model rozróżnia 15 klas, dataset jest niewielki, a część albumów ma mało przykładów.
-
-Wyniki są zapisywane do:
-
-```text
-reports/metrics.json
-reports/classification_report.txt
-reports/evaluation_summary.txt
-```
-
-Aktualny model jest zapisywany lokalnie jako:
-
-```text
-artifacts/model_full_discography.joblib
-```
-
-Pliki `.joblib` nie są trzymane w repozytorium, ponieważ są artefaktami generowanymi lokalnie.
+- czyszczenie braków w danych;
+- usuwanie rekordów bez albumu lub tekstu;
+- filtrowanie albumów według minimalnej liczby utworów;
+- TF-IDF z unigramami i bigramami;
+- `LogisticRegression(max_iter=2000, class_weight="balanced", solver="lbfgs")`;
+- `train_test_split(..., stratify=y)`;
+- `StratifiedKFold`;
+- zapis modelu do `.joblib`;
+- zapis raportów do `reports/`.
 
 ## Porównanie modeli
 
-Projekt porównuje kilka klasycznych modeli tekstowych:
-
-- `DummyClassifier` jako baseline,
-- `LogisticRegression`,
-- `MultinomialNB`,
-- `LinearSVC`.
-
-Wyniki są zapisywane do:
+Wyniki zapisuję do:
 
 ```text
 reports/model_comparison.csv
 ```
 
-Aktualne porównanie:
+Aktualne porównanie przy `MIN_SONGS_PER_ALBUM = 4`:
 
 | Model | CV accuracy mean | Test accuracy | Test macro F1 | Test weighted F1 |
 |---|---:|---:|---:|---:|
@@ -148,90 +159,154 @@ Aktualne porównanie:
 | Multinomial NB | 0.2073 | 0.1818 | 0.0847 | 0.0713 |
 | Dummy Most Frequent | 0.1585 | 0.1515 | 0.0175 | 0.0399 |
 
-Najlepszym modelem referencyjnym pozostaje `Logistic Regression`. `LinearSVC` osiąga takie samo `test accuracy`, ale niższe `test macro F1`, dlatego nie zastępuje aktualnego modelu głównego.
+`Logistic Regression` pozostaje najlepszym modelem referencyjnym, bo osiąga
+najwyższe `test macro F1`. `LinearSVC` ma podobną accuracy, ale słabszy wynik
+macro F1.
 
-Baseline `DummyClassifier` pokazuje, że proste przewidywanie najczęstszej klasy daje około `0.1515` accuracy, więc modele tekstowe rzeczywiście uczą się sygnału z danych.
+## Interpretowalność
 
-## Analiza błędów
-
-Skrypt zapisuje dodatkowe raporty pomagające zrozumieć pomyłki modelu:
-
-```text
-reports/confusion_matrix.png
-reports/errors.csv
-reports/error_summary.csv
-```
-
-`errors.csv` zawiera konkretne błędne predykcje wraz z prawdziwym albumem, przewidzianym albumem, confidence oraz podglądem tekstu.
-
-`error_summary.csv` agreguje błędy po parach:
+Po treningu zapisuję:
 
 ```text
-true_album -> predicted_album
+reports/top_features_by_album.csv
 ```
 
-W aktualnym podziale testowym model popełnia 15 błędów. Najczęściej przewidywane albumy wśród błędów:
+To raport z cechami TF-IDF o najwyższych wagach dla każdego albumu w modelu
+głównym. Przykład:
+
+| Album | Top cechy |
+|---|---|
+| `0,25 mg EP` | `quebonafide`, `refren quebonafide`, `zwrotka quebonafide` |
+| `1-800-OŚWIECENIE` | `800`, `oświecenie`, `800 oświecenie` |
+
+Ten raport nie jest dowodem przyczynowości, ale pomaga mi sprawdzić, czy model
+opiera się na sensownych sygnałach tekstowych.
+
+## Eksperyment `min_songs`
+
+CLI pozwala mi porównać próg minimalnej liczby utworów na album bez edycji kodu.
+Wyniki eksperymentu zapisuję w:
 
 ```text
-Marmur: 5
-Café Belga: 3
-POCZTÓWKA Z WWA, LATO '19: 2
-SOMA 0,5 mg: 1
-LATARNIE WSZĘDZIE DAWNO ZGASŁY: 1
+reports/min_songs_comparison.csv
+reports/min_songs_4/
+reports/min_songs_5/
 ```
 
-Najważniejszy wniosek z analizy błędów: model zbyt często przewiduje `Marmur` dla utworów z innych albumów. Błędy są jednak rozproszone po wielu parach albumów, więc problem nie sprowadza się do jednej dominującej pomyłki.
+| Min songs | Albumy | Utwory | CV folds | Test accuracy | Test macro F1 | Błędy |
+|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 15 | 164 | 4 | 0.5455 | 0.4583 | 15 |
+| 5 | 14 | 160 | 5 | 0.6250 | 0.5391 | 12 |
 
-## Uruchomienie
+Wariant `min_songs = 5` daje lepsze metryki, ale usuwa z zadania `Flagey EP`.
+Traktuję to jako kompromis między liczbą klas a stabilnością ewaluacji.
 
-### 1. Utworzenie środowiska
+## Eksperymenty TF-IDF
 
-Linux / macOS:
+Skrypt zapisuje porównanie kilku konfiguracji TF-IDF do:
 
-```bash
-python -m venv venv
-source venv/bin/activate
+```text
+reports/tfidf_experiments.csv
 ```
+
+Aktualne wyniki:
+
+| Eksperyment | N-gramy | min_df | max_features | sublinear_tf | Test accuracy | Test macro F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| `unigrams_only` | 1-1 | 2 | 5000 | True | 0.6061 | 0.4989 |
+| `no_sublinear_tf` | 1-2 | 2 | 5000 | False | 0.5758 | 0.4905 |
+| `default` | 1-2 | 2 | 5000 | True | 0.5455 | 0.4583 |
+| `max_features_3000` | 1-2 | 2 | 3000 | True | 0.5455 | 0.4578 |
+| `min_df_1` | 1-2 | 1 | 5000 | True | 0.5455 | 0.4356 |
+
+Najlepszy pojedynczy wynik testowy daje wariant unigramowy. Traktuję go jako
+dobrego kandydata na kolejną konfigurację domyślną, ale przy tak małym zbiorze
+warto traktować pojedynczy split ostrożnie.
+
+## Szybki start
 
 Windows PowerShell:
 
 ```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-### 2. Instalacja zależności
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Trening modelu i wygenerowanie raportów
-
-```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e .
 python train_model.py
-```
-
-Po uruchomieniu skrypt:
-
-- wczytuje dane,
-- pokazuje rozkład utworów po albumach,
-- filtruje albumy z mniej niż 4 utworami,
-- dzieli dane na train/test,
-- trenuje główny model,
-- liczy metryki,
-- generuje confusion matrix,
-- zapisuje błędne predykcje,
-- tworzy podsumowanie błędów,
-- porównuje kilka modeli,
-- zapisuje tekstowe podsumowanie ewaluacji,
-- zapisuje model lokalnie do `artifacts/`.
-
-### 4. Testowe wczytanie modelu
-
-```bash
 python load_model.py
 ```
+
+Linux / macOS:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+python train_model.py
+python load_model.py
+```
+
+## CLI
+
+Przykłady:
+
+```powershell
+python train_model.py --min-songs 5 --output-dir reports\min_songs_5 --model-path artifacts\model_min_songs_5.joblib
+python train_model.py --model linear_svc --output-dir reports\linear_svc
+python train_model.py --test-size 0.25 --output-dir reports\test_size_025
+```
+
+Dostępne opcje:
+
+```text
+--data-path
+--min-songs
+--test-size
+--model
+--output-dir
+--model-path
+--random-state
+--max-cv-splits
+--tfidf-min-df
+--tfidf-max-features
+--tfidf-ngram-max
+--no-sublinear-tf
+```
+
+## Testy
+
+Dodałem mały zestaw testów, które sprawdzają krytyczne zachowania bez
+testowania każdej drobnostki:
+
+- filtrowanie albumów po minimalnej liczbie utworów;
+- budowę pipeline TF-IDF + klasyfikator;
+- mapowanie argumentów CLI na konfigurację treningu.
+
+Uruchomienie:
+
+```powershell
+python -m pip install -e ".[dev]"
+python -m pytest
+```
+
+## Raporty i artefakty
+
+Po uruchomieniu `python train_model.py` generuję:
+
+```text
+reports/metrics.json
+reports/classification_report.txt
+reports/confusion_matrix.png
+reports/errors.csv
+reports/error_summary.csv
+reports/evaluation_summary.txt
+reports/model_comparison.csv
+reports/top_features_by_album.csv
+reports/tfidf_experiments.csv
+artifacts/model_full_discography.joblib
+```
+
+Pliki `.joblib` są artefaktami generowanymi lokalnie i nie powinny być
+commitowane.
 
 ## Struktura projektu
 
@@ -247,57 +322,48 @@ python load_model.py
 │   ├── confusion_matrix.png
 │   ├── errors.csv
 │   ├── error_summary.csv
+│   ├── evaluation_summary.txt
 │   ├── model_comparison.csv
-│   └── evaluation_summary.txt
+│   ├── top_features_by_album.csv
+│   ├── tfidf_experiments.csv
+│   ├── min_songs_comparison.csv
+│   ├── min_songs_4/
+│   └── min_songs_5/
+├── src/
+│   └── lyrics_classifier/
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── config.py
+│       ├── data.py
+│       ├── evaluation.py
+│       ├── modeling.py
+│       └── reports.py
 ├── train_model.py
 ├── load_model.py
+├── pyproject.toml
 ├── requirements.txt
-├── README.md
-└── sprawozdanie.md
-```
-
-Uwaga: katalog `artifacts/` oraz pliki `.joblib` mogą nie być widoczne w repozytorium po sklonowaniu projektu, ponieważ model jest generowany lokalnie i ignorowany przez Git.
-
-## Wersjonowanie modelu
-
-Pierwsza wersja modelu:
-
-```text
-artifacts/model_v1.joblib
-```
-
-Aktualna wersja modelu dla rozszerzonego datasetu:
-
-```text
-artifacts/model_full_discography.joblib
-```
-
-Kolejne wersje modelu powinny być tworzone po zmianie:
-
-- danych,
-- preprocessingu,
-- parametrów TF-IDF,
-- algorytmu klasyfikacji,
-- sposobu ewaluacji,
-- minimalnej liczby utworów na album.
-
-Przykład tagu Git:
-
-```bash
-git tag v2.0
-git push origin v2.0
+├── tests/
+│   ├── test_cli.py
+│   ├── test_data.py
+│   └── test_modeling.py
+└── README.md
 ```
 
 ## Ograniczenia
 
-Dataset jest niewielki, a część albumów ma bardzo mało przykładów. Przykładowo `Flagey EP` ma 4 utwory w całym zbiorze, więc po podziale train/test model ma bardzo mało danych do nauczenia się tej klasy.
+Dataset jest niewielki, a część albumów ma bardzo mało przykładów. Przykładowo
+`Flagey EP` ma 4 utwory w całym zbiorze, więc przy progu `min_songs = 4` model
+ma bardzo mało danych dla tej klasy.
 
-Z tego powodu pojedynczy wynik na zbiorze testowym należy traktować ostrożnie. Ważniejsze są:
+Z tego powodu pojedynczy wynik na zbiorze testowym należy traktować ostrożnie.
+Ważniejsze są:
 
-- walidacja krzyżowa,
-- macro F1,
-- analiza błędów,
-- confusion matrix,
-- porównanie kilku modeli.
+- walidacja krzyżowa;
+- macro F1;
+- analiza błędów;
+- confusion matrix;
+- porównanie kilku modeli;
+- jawne opisanie progu filtrowania albumów.
 
-Wynik `0.5455` accuracy nie powinien być interpretowany w oderwaniu od kontekstu. Zadanie obejmuje 15 klas, a dane są małe i nierówne. W projekcie ważniejsze jest pokazanie pełnego procesu ML: przygotowania danych, uczciwej ewaluacji, analizy błędów i świadomego wyboru modelu.
+W tym projekcie ważniejsze od samej accuracy jest pokazanie pełnego procesu ML:
+przygotowania danych, ewaluacji, analizy błędów i świadomego wyboru modelu.

@@ -3,10 +3,6 @@ Lyrics Classifier - podsumowanie ewaluacji
 Liczba albumów po filtrowaniu: 15
 Liczba utworów po filtrowaniu: 164
 Minimalna liczba utworów na album: 4
-TF-IDF min_df: 2
-TF-IDF max_features: 5000
-TF-IDF ngram_range: (1, 2)
-TF-IDF sublinear_tf: True
 
 Główny model: Logistic Regression
 CV accuracy mean: 0.6098

@@ -6,13 +6,6 @@
   "random_state": 42,
   "cv_n_splits": 4,
   "model_name": "logistic_regression",
-  "tfidf_min_df": 2,
-  "tfidf_max_features": 5000,
-  "tfidf_ngram_range": [
-    1,
-    2
-  ],
-  "tfidf_sublinear_tf": true,
   "cv_accuracy_mean": 0.6097560975609757,
   "cv_accuracy_std": 0.06218316479991202,
   "cv_accuracy_scores": [

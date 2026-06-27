@@ -1,0 +1,21 @@
+{
+  "n_albums": 14,
+  "n_songs": 160,
+  "min_songs_per_album": 5,
+  "test_size": 0.2,
+  "random_state": 42,
+  "cv_n_splits": 5,
+  "model_name": "logistic_regression",
+  "cv_accuracy_mean": 0.6375,
+  "cv_accuracy_std": 0.09395810236483068,
+  "cv_accuracy_scores": [
+    0.46875,
+    0.6875,
+    0.625,
+    0.75,
+    0.65625
+  ],
+  "test_accuracy": 0.625,
+  "test_macro_f1": 0.5391156462585034,
+  "test_weighted_f1": 0.5617559523809523
+}
