@@ -1,0 +1,20 @@
+                                precision    recall  f1-score   support
+
+                    0,25 mg EP       0.00      0.00      0.00         2
+              1-800-OŚWIECENIE       1.00      1.00      1.00         5
+                    Café Belga       0.00      0.00      0.00         2
+                        Europa       1.00      0.33      0.50         3
+                       Jarmark       0.75      1.00      0.86         3
+LATARNIE WSZĘDZIE DAWNO ZGASŁY       0.75      1.00      0.86         3
+                        Marmur       0.50      1.00      0.67         3
+     POCZTÓWKA Z WWA, LATO '19       0.50      1.00      0.67         2
+                   SOMA 0,5 mg       0.00      0.00      0.00         3
+                      Szprycer       0.00      0.00      0.00         2
+            Trójkąt Warszawski       1.00      1.00      1.00         1
+                Umowa o dzieło       0.00      0.00      0.00         1
+                       WOSK EP       1.00      1.00      1.00         1
+                    Young Hems       1.00      1.00      1.00         1
+
+                      accuracy                           0.62        32
+                     macro avg       0.54      0.60      0.54        32
+                  weighted avg       0.56      0.62      0.56        32

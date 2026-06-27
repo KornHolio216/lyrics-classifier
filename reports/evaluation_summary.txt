@@ -1,0 +1,33 @@
+Lyrics Classifier - podsumowanie ewaluacji
+
+Liczba albumów po filtrowaniu: 15
+Liczba utworów po filtrowaniu: 164
+Minimalna liczba utworów na album: 4
+TF-IDF min_df: 2
+TF-IDF max_features: 5000
+TF-IDF ngram_range: (1, 2)
+TF-IDF sublinear_tf: True
+
+Główny model: Logistic Regression
+CV accuracy mean: 0.6098
+CV accuracy std: 0.0622
+Test accuracy: 0.5455
+Test macro F1: 0.4583
+Test weighted F1: 0.4885
+
+Najlepszy model w porównaniu:
+logistic_regression (test macro F1: 0.4583, test accuracy: 0.5455)
+
+Liczba błędnych predykcji w zbiorze testowym: 15
+
+Najczęściej przewidywane albumy wśród błędów:
+- Marmur: 5
+- Café Belga: 3
+- POCZTÓWKA Z WWA, LATO '19: 2
+- SOMA 0,5 mg: 1
+- LATARNIE WSZĘDZIE DAWNO ZGASŁY: 1
+
+Interpretacja:
+Spadek wyników względem wcześniejszej wersji 3-albumowej jest oczekiwany, ponieważ aktualne zadanie obejmuje wiele klas i mały, nierówny dataset.
+Model główny należy oceniać przez test macro F1, walidację krzyżową i analizę błędów, a nie samą accuracy.
+Błędy są rozproszone po wielu parach albumów, więc pojedynczy split testowy trzeba traktować ostrożnie.

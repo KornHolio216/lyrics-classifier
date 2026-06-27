@@ -2,5 +2,10 @@ venv/
 .venv/
 __pycache__/
 *.pyc
+*.egg-info/
+.pytest_cache/
+pytest-cache-files-*/
 .ipynb_checkpoints/
 .DS_Store
+artifacts/*.joblib
+.idea/

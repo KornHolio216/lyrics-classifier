@@ -1,9 +1,16 @@
 from pathlib import Path
 import joblib
 
-MODEL_PATH = Path("artifacts/model_v1.joblib")
+MODEL_PATH = Path("artifacts/model_full_discography.joblib")
+
 
 def main() -> None:
+    if not MODEL_PATH.exists():
+        raise FileNotFoundError(
+            f"Nie znaleziono modelu: {MODEL_PATH}. "
+            "Uruchom najpierw `python train_model.py`."
+        )
+
     model = joblib.load(MODEL_PATH)
 
     sample_text = """
@@ -25,8 +32,13 @@ def main() -> None:
 
     if probabilities is not None:
         print("\nPrawdopodobieństwa klas:")
-        for label, prob in sorted(zip(classes, probabilities), key=lambda x: x[1], reverse=True):
+        for label, prob in sorted(
+            zip(classes, probabilities),
+            key=lambda x: x[1],
+            reverse=True,
+        ):
             print(f"- {label}: {prob:.4f}")
+
 
 if __name__ == "__main__":
     main()
